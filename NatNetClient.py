@@ -1,4 +1,9 @@
-﻿import socket
+﻿'''
+This file was taken from the NatNet SDK and modified slightly.
+NatNet Version 2.10.0 (06/15/2016)
+'''
+
+import socket
 import struct
 from threading import Thread, Lock
 

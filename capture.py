@@ -1,3 +1,10 @@
+'''
+This file has code from the NatNet SDK and Pupil-Labs GitHub Repo.
+NatNet Version 2.10.0 (06/15/2016)
+
+File created: (03/17/2017)
+'''
+
 import argparse
 from NatNetClient import NatNetClient
 from time import sleep, time
