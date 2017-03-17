@@ -77,7 +77,7 @@ class Msg_Receiver(object):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        prog='capture',
+        prog='python capture.py',
          description='''
              This program captures data streamed from
              pupil labs and OptiTrack. The data is then
@@ -122,6 +122,10 @@ if __name__ == '__main__':
     parser.add_argument('--optitrack-off',
                         action='store_true',
                         help="don't record any data from OptiTrack.")
+    parser.add_argument("--max-frames-per-second",
+                        default=70,
+                        type=int,
+                        help="sets the max number of frames captured per second. (default: 70)")
     args = parser.parse_args()
 
     output_header = {}
@@ -237,7 +241,7 @@ if __name__ == '__main__':
                 f.write(json.dumps(obj))
                 frame = frame + 1
 
-                sleep(max(0, (1.0/70.0) - (time() - sft)))
+                sleep(max(0, (1.0/args.max_frames_per_second) - (time() - sft)))
                 
         except KeyboardInterrupt:
             f.write(']}\n')
