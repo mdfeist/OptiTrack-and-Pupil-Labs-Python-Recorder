@@ -8,7 +8,7 @@ import struct
 from threading import Thread, Lock
 
 def trace( *args ):
-    pass # print( "".join(map(str,args)) )
+    pass #print( "".join(map(str,args)) )
 
 # Create structs for reading various object types to speed up parsing.
 Vector3 = struct.Struct( '<fff' )
@@ -45,6 +45,9 @@ class NatNetClient:
         # List of rigid bodies
         self.rigidBodyDescription = []
         self.rigidBodyList = []
+
+        # List of markers
+        self.markerList = []
 
         # Lock for Client
         self._lock = Lock()
@@ -195,6 +198,7 @@ class NatNetClient:
 
         data = memoryview( data )
         offset = 0
+        self.markerList = []
         
         # Frame number (4 bytes)
         frameNumber = int.from_bytes( data[offset:offset+4], byteorder='little' )
@@ -228,9 +232,13 @@ class NatNetClient:
         trace( "Unlabeled Markers Count:", unlabeledMarkersCount )
 
         for i in range( 0, unlabeledMarkersCount ):
+            marker = {}
+            marker['labeled'] = False
             pos = Vector3.unpack( data[offset:offset+12] )
+            marker['position'] = pos
             offset += 12
             trace( "\tMarker", i, ":", pos[0],",", pos[1],",", pos[2] )
+            self.markerList.append(marker)
 
         # Rigid body count (4 bytes)
         rigidBodyCount = int.from_bytes( data[offset:offset+4], byteorder='little' )
@@ -256,11 +264,16 @@ class NatNetClient:
             offset += 4
             trace( "Labeled Marker Count:", labeledMarkerCount )
             for i in range( 0, labeledMarkerCount ):
+                marker = {}
+                marker['labeled'] = True
                 id = int.from_bytes( data[offset:offset+4], byteorder='little' )
+                marker['id'] = id
                 offset += 4
                 pos = Vector3.unpack( data[offset:offset+12] )
+                marker['position'] = pos
                 offset += 12
                 size = FloatValue.unpack( data[offset:offset+4] )
+                marker['size'] = size
                 offset += 4
 
                 # Version 2.6 and later
@@ -475,12 +488,15 @@ class NatNetClient:
     def get_version( self ):
         return self.__natNetStreamVersion
 
+    def getMarkerList( self ):
+        return self.markerList
+
     def getRigidBodyList( self ):
         return self.rigidBodyList
 
     def getRigidBodyDescription( self ):
         return self.rigidBodyDescription
-            
+         
     def sendCommand( self, command, commandStr, socket, address ):
         # Compose the message in our known message format
         if( command == self.NAT_REQUEST_MODELDEF or command == self.NAT_REQUEST_FRAMEOFDATA ):
@@ -499,7 +515,7 @@ class NatNetClient:
         data += b'\0'
 
         socket.sendto( data, address )
-
+        
     def run( self ):
         # Create the data socket
         self.dataSocket = self.__createDataSocket( self.dataPort )

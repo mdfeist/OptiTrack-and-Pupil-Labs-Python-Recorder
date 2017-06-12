@@ -229,6 +229,7 @@ if __name__ == '__main__':
                     
                 if not args.optitrack_off:
                     obj['rigidBodies'] = streamingClient.getRigidBodyList()
+                    obj['markers'] = streamingClient.getMarkerList()
                 
                 if not args.optitrack_off:        
                     streamingClient.unlock()
